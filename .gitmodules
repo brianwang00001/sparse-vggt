@@ -1,0 +1,9 @@
+[submodule "external/vggt"]
+	path = external/vggt
+	url = https://github.com/facebookresearch/vggt.git
+[submodule "external/SpargeAttn"]
+	path = external/SpargeAttn
+	url = https://github.com/brianwang00001/SpargeAttn.git
+[submodule "external/Pi3"]
+	path = external/Pi3
+	url = https://github.com/yyfz/Pi3.git

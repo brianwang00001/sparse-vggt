@@ -1,0 +1,17 @@
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv/
+mise.toml
+dev.py
+dev.ipynb
+pyrightconfig.json
+py.typed
+results/
+.vscode/
+.cursor/
+.ruff_cache/
+slurm/
