@@ -1,0 +1,143 @@
+body {
+  font-family: "Noto Sans", sans-serif;
+}
+
+.footer .icon-link {
+  font-size: 25px;
+  color: #000;
+}
+
+.link-block a {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.teaser .hero-body {
+  padding-top: 0;
+  padding-bottom: 3rem;
+}
+
+.publication-banner {
+  max-height: parent;
+}
+
+.publication-banner video {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  object-fit: fit;
+}
+
+.publication-title {
+  font-family: "Noto Sans", sans-serif;
+}
+
+.publication-authors {
+  font-family: "Noto Sans", sans-serif;
+}
+
+.publication-venue {
+  color: #555;
+  width: fit-content;
+  font-weight: bold;
+}
+
+.publication-awards {
+  color: #ff3860;
+  width: fit-content;
+  font-weight: bolder;
+}
+
+.publication-authors a {
+  color: hsl(204, 86%, 53%) !important;
+}
+
+.publication-authors a:hover {
+  text-decoration: underline;
+}
+
+.author-block {
+  display: inline-block;
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.MathJax_Preview .MJXf-math {
+  color: inherit !important;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.img-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.img-card > img {
+  display: block;
+  width: 100%;
+}
+
+.content figure.full-width {
+  max-width: 100%;
+  margin: 0 auto;
+  overflow: auto;
+}
+
+.content figcaption {
+  font-size: 0.9em;
+  margin-top: 0.75rem;
+}
+
+#experiments h4 {
+  margin-bottom: calc(var(--bulma-block-spacing) * 0.5);
+}
+
+#experiments h4:not(:first-child) {
+  margin-top: calc(var(--bulma-block-spacing) * 1.75);
+}
+
+.copy-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.copy-button > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.info-box {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  margin-left: 2.5rem;
+  margin-right: 2.5rem;
+  /* margin-bottom: var(--bulma-content-block-margin-bottom); */
+  margin-bottom: 2rem;
+  border-radius: 0.5rem;
+  background: rgb(240, 240, 240);
+}
+
+@media (prefers-color-scheme: dark) {
+  .info-box {
+    background: rgb(50, 50, 50);
+  }
+}
+
+@media (max-width: 768px) {
+  .info-box {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}

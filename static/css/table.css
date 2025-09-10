@@ -1,0 +1,45 @@
+table.latex td.group-label {
+    vertical-align: middle;
+    text-align: center;
+    padding: 0;
+    width: 1.5rem;
+}
+
+table.latex td.group-label>span {
+    display: inline-block;
+    transform: rotate(-90deg);
+    white-space: nowrap;
+}
+
+table.latex tr.group-start td {
+    border-top-width: 2px !important;
+}
+
+table.latex th,
+table.latex td {
+    white-space: nowrap;
+}
+
+
+.content table {
+    width: 100%;
+}
+
+.content table tr.no-border>td,
+.content table td.no-border,
+.content table th.no-border {
+    border-bottom: 0;
+}
+
+.content table>thead th.spacer,
+.content table>tbody td.spacer {
+    padding: 0.5rem;
+}
+
+table.latex th {
+    font-weight: inherit;
+}
+
+table.latex td>b {
+    font-weight: 800;
+}

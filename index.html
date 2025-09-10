@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Global Attention is the main computational contributor in VGGT and 𝜋3. Our analysis reveals sparsity patterns in the attention that we exploit with a training-free approach, achieving up to 4× faster inference.">
+  <meta name="keywords" content="VGGT, Faster VGGT, Sparse, Block-Sparse Global Attention, 3D Reconstruction">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Faster VGGT with Block-Sparse Global Attention</title>
+  <meta property="og:title" content="Faster VGGT with Block-Sparse Global Attention">
+  <meta property="og:description" content="Global Attention is the main computational contributor in VGGT and 𝜋3. Our analysis reveals sparsity patterns in the attention that we exploit with a training-free approach, achieving up to 4× faster inference.">
+  
+  <meta property="twitter:card" content="summary">
+  <meta property="twitter:title" content="Faster VGGT with Block-Sparse Global Attention">
+  <meta property="twitter:description" content="Global Attention is the main computational contributor in VGGT and 𝜋3. Our analysis reveals sparsity patterns in the attention that we exploit with a training-free approach, achieving up to 4× faster inference.">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Castoro&family=Noto+Sans:wght@400;600;800&family=Google+Sans&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/table.css">
+  <link rel="stylesheet" href="./static/css/model-viewer.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/logo.svg">
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+</head>
+
+<body>
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-2 publication-title">Faster VGGT with Block-Sparse Global Attention</h1>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="">Chung-Shien Brian Wang</a>
+              </span>
+              <span class="author-block">
+                <a href="https://github.com/Schmiddo">Christian Schmidt</a>
+              </span>
+              <span class="author-block"><a href="https://github.com/jenspiek">Jens Piekenbrinck</a></span>
+              <span class="author-block"><a href="https://scholar.google.com/citations?user=ZcULDB0AAAAJ">Bastian
+                  Leibe</a></span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">RWTH Aachen University</span>
+            </div>
+            <br>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <!-- PDF Link. -->
+                <span class="link-block">
+                  <a href="https://arxiv.org/pdf/2509.07120" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fa-solid fa-file-pdf"></i>
+                    </span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+                <!-- Arxiv Link. -->
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2509.07120" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                    </span>
+                    <span>arXiv</span>
+                  </a>
+                </span>
+                <!-- Code Link. -->
+                <span class="link-block">
+                  <a href="https://vision.rwth-aachen.de/sparse-vggt"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fa-brands fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <div class="content has-text-justified">
+            <div class="info-box">
+              <span style="font-size: 2.5rem;">⚡️</span>
+              <span>Global Attention is the main computational contributor in VGGT and \(\pi^3\). Our analysis reveals <b>sparsity</b>
+                patterns in
+                the attention that we exploit with a <b>training-free</b> approach, achieving up to <b>\(4\times\)
+                  faster</b>
+                inference.</span>
+            </div>
+            <figure class="full-width">
+              <div class="img-card">
+                <img src="./static/images/analysis/attn_map.png" alt="Global Attention Overview" />
+              </div>
+            </figure>
+            <figcaption>
+              <p>
+                <b>Visualization of VGGT's global attention matrix.</b> A very small number of entries is highly
+                activated, while the vast majority of entries is near zero.
+                This visualization shows the average attention map over all heads of layer 15 in the VGGT aggregator, at
+                an input resolution of \(224\times 182\).
+                Upper highlight: The special tokens attend to each other and form a distinctive pattern.
+                Lower highlight: Patch-level attention is localized on a small subset of highly activated entries.
+                See the supplementary material for an enlarged visualization.
+              </p>
+            </figcaption>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Efficient and accurate feed-forward multi-view reconstruction has long been an important task in computer
+              vision.
+              Recent transformer-based models like VGGT and \(\pi^3\) have achieved impressive results with simple
+              architectures, yet they face an inherent runtime bottleneck, due to the quadratic complexity of the global
+              attention layers, that limits the scalability to large image sets.
+              In this paper, we empirically analyze the global attention matrix of these models and observe that
+              probability mass concentrates on a small subset of patch-patch interactions that correspond to cross-view
+              geometric matches.
+              Motivated by the structured attention and inspired by recent advancement in large language models, we
+              propose a replacement for the dense global attention operation based on highly optimized block-sparse
+              kernels, yielding up to \(\mathbf{4\times}\) faster inference with comparable task performance.
+              Our retrofit requires no retraining of the backbone, extends to both VGGT and \(\pi^3\), and supports
+              larger image collections.
+              Evaluations on a comprehensive suite of multi-view benchmarks demonstrate the effectiveness of our
+              approach.
+            </p>
+          </div>
+        </div>
+      </div>
+  </section>
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Analysis</h2>
+          <div class="content has-text-justified">
+            <figure class="full-width">
+              <div class="img-card">
+                <img src="./static/images/performance_overview.png" alt="Performance Overview"
+                  style="max-width: min(350px, 100%);" />
+              </div>
+            </figure>
+            <figcaption>
+              <p>
+                <b>Runtime of VGGT’s forward pass.</b> FA denotes frame-wise attention.
+                As the number of input frames increases, global attention dominates the computational cost (measured
+                with <a href="https://arxiv.org/abs/2205.14135" target="_blank">FlashAttention2</a> on an H100 GPU).
+                We propose to adapt a block-sparse attention method that considerably reduces the cost of Global
+                Attention while preserving result quality.
+              </p>
+            </figcaption>
+          </div>
+          <div class="content has-text-justified">
+            <figure class="full-width">
+              <div class="img-card" style="flex-direction: row; justify-content: space-around; gap: 0.75rem;">
+                <img src="./static/images/analysis/correspondences.png" alt="Correspondences" style="width: 45%;" />
+                <img src="./static/images/analysis/sparsity_plot.png" alt="Sparsity Plot" style="width: 45%;" />
+              </div>
+            </figure>
+            <figcaption>
+              <p>
+                <b>VGGT’s global attention matrix is extremely sparse.</b> Left: We visualize the tokens corresponding
+                to the top-k activated entries of the attention map of layer 15. Right: Average & maximum attention
+                scores in the global attention maps; the shorthand {S,P}2{P,S} denotes attention between special (S) and
+                patch (P) tokens. Layers in the middle of the aggregator exhibit higher activations and increased
+                sparsity. Note the different scalings of the mean and max activations.
+              </p>
+            </figcaption>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Method</h2>
+          <div class="content has-text-justified">
+            <p>We employ a training-free adaptive sparse block-attention in the global attention layers of the model to
+              exploit
+              these sparsity patterns.</p>
+            <figure class="full-width">
+              <div class="img-card">
+                <img src="./static/images/vggt_arch_overview.jpg" alt="VGGT Overview" />
+              </div>
+            </figure>
+            <figcaption>
+              <p>
+                <b>Architecture overview of VGGT.</b> The pretrained checkpoint contains a lightweight camera regression
+                head and three DPT heads. The DINO patchifier and the aggregator contain roughly 300M parameters each,
+                while the DPT heads contain around 32M each.
+              </p>
+            </figcaption>
+          </div>
+          <div class="content has-text-justified">
+            <figure class="full-width">
+              <div class="img-card">
+                <img src="./static/images/sparse_attn_inference.svg" alt="Sparse Attention Inference"
+                  style="min-width: 60%;" />
+              </div>
+            </figure>
+            <figcaption>
+              <p>
+                <b>Overview of the training-free adaptive sparse attention.</b> Keys and queries are average pooled to
+                estimate a low-resolution approximation of the attention map. This low-resolution attention map is used
+                to create the binary mask for block-sparse attention.
+              </p>
+            </figcaption>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column">
+          <h2 class="title is-3">Qualitative Examples</h2>
+
+          <div class="content has-text-justified">
+            <p>We show examples from the ETH3D dataset. Increasing sparsity leads to small perturbations in the
+              reconstruction, but the overall quality stays remarkably high.</p>
+            <div class="figure-grid">
+              <div class="spacer"></div>
+              <div class="column-title">Original Model</div>
+              <div class="column-title">50% Sparsity</div>
+              <div class="column-title hide-sm">70% Sparsity</div>
+
+              <div class="row-title"><span>VGGT</span></div>
+              <div class="cell">
+                <div class="model-viewer-card">
+                  <model-viewer id="modelViewerComparison2" class="model-viewer" loading="eager" touch-action="pan-y"
+                    environment-image="legacy" zoom-sensitivity="0.2" camera-controls="" disable-tap=""
+                    min-camera-orbit="auto auto 10m" max-camera-orbit="auto auto 70m" interaction-prompt="none"
+                    shadow-intensity="0" ar="" ar-status="not-presenting" orientation="0deg -90deg -90deg"
+                    src="./static/assets/vggt/courtyard-mask.glb"></model-viewer>
+                </div>
+              </div>
+              <div class="cell">
+                <div class="model-viewer-card">
+                  <model-viewer id="modelViewerComparison3" class="model-viewer" loading="eager" touch-action="pan-y"
+                    environment-image="legacy" zoom-sensitivity="0.2" camera-controls="" disable-tap=""
+                    min-camera-orbit="auto auto 10m" max-camera-orbit="auto auto 70m" interaction-prompt="none"
+                    shadow-intensity="0" ar="" ar-status="not-presenting" orientation="0deg -90deg -90deg"
+                    src="./static/assets/vggt_ratio0.5_cdf0.7_sparsity0.46/courtyard-mask.glb"></model-viewer>
+                </div>
+              </div>
+              <div class="cell hide-sm">
+                <div class="model-viewer-card">
+                  <model-viewer id="modelViewerComparison5" class="model-viewer" loading="eager" touch-action="pan-y"
+                    environment-image="legacy" zoom-sensitivity="0.2" camera-controls="" disable-tap=""
+                    min-camera-orbit="auto auto 10m" max-camera-orbit="auto auto 70m" interaction-prompt="none"
+                    shadow-intensity="0" ar="" ar-status="not-presenting" orientation="0deg -90deg -90deg"
+                    src="./static/assets/vggt_ratio0.8_cdf0.5_sparsity0.70/courtyard-mask.glb"></model-viewer>
+                </div>
+              </div>
+
+              <div class="row-title"><span>\(\pi^3\)</span></div>
+              <div class="cell">
+                <div class="model-viewer-card">
+                  <model-viewer id="modelViewerComparison7" class="model-viewer" loading="eager" touch-action="pan-y"
+                    environment-image="legacy" zoom-sensitivity="0.2" camera-controls="" disable-tap=""
+                    min-camera-orbit="auto auto 5m" max-camera-orbit="auto auto 40m" interaction-prompt="none"
+                    shadow-intensity="0" ar="" ar-status="not-presenting" orientation="0 -90deg -90deg"
+                    src="./static/assets/pi3/playground-mask.glb"></model-viewer>
+                </div>
+              </div>
+              <div class="cell">
+                <div class="model-viewer-card">
+                  <model-viewer id="modelViewerComparison8" class="model-viewer" loading="eager" touch-action="pan-y"
+                    environment-image="legacy" zoom-sensitivity="0.2" camera-controls="" disable-tap=""
+                    min-camera-orbit="auto auto 5m" max-camera-orbit="auto auto 40m" interaction-prompt="none"
+                    shadow-intensity="0" ar="" ar-status="not-presenting" orientation="0 -90deg -90deg"
+                    src="./static/assets/pi3_ratio0.5_cdf0.7_sparsity0.48/playground-mask.glb"></model-viewer>
+                </div>
+              </div>
+              <div class="cell hide-sm">
+                <div class="model-viewer-card">
+                  <model-viewer id="modelViewerComparison10" class="model-viewer" loading="eager" touch-action="pan-y"
+                    environment-image="legacy" zoom-sensitivity="0.2" camera-controls="" disable-tap=""
+                    min-camera-orbit="auto auto 5m" max-camera-orbit="auto auto 40m" interaction-prompt="none"
+                    shadow-intensity="0" ar="" ar-status="not-presenting" orientation="0 -90deg -90deg"
+                    src="./static/assets/pi3_ratio0.8_cdf0.5_sparsity0.74/playground-mask.glb"></model-viewer>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experiments" class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column">
+          <h2 class="title is-3">Quantitative Experiments</h2>
+          <div class="content has-text-justified">
+            <h4 class="title has-text-centered">Relative Pose Estimation & Multi-View Reconstruction</h4>
+            <figure class="full-width">
+              <div class="img-card">
+                <img src="./static/images/quantitative_experiments.png" alt="Quantitative Experiments" style="max-width:840px;" />
+              </div>
+            </figure>
+            <figcaption>
+              <p>
+                <b>Results for Relative Pose Estimation (top) Multi-View Reconstruction (bottom).</b> Multi-view
+                reconstruction performance seems to be robust against sparsification of global attention; even in
+                the highest sparsity settings, the results are on par or better than other state-of-the-art
+                methods. We provide comprehensive tables for these results in the supplementary material.
+              </p>
+            </figcaption>
+          </div>
+          <div class="content has-text-justified">
+            <h4 class="title has-text-centered">Camera Pose Estimation</h4>
+            <div class="columns is-centered has-text-centered">
+              <div class="column is-half-desktop has-text-centered">
+                <div class="content has-text-justified">
+                  <figure class="full-width">
+                    <table class="latex" style="font-size: 0.8em;">
+                      <thead>
+                        <tr class="has-text-centered">
+                          <th style="width:1.5rem;"></th> <!-- group label column -->
+                          <th class="has-text-left">Method</th>
+                          <th>RRA@5↑</th>
+                          <th>RTA@5↑</th>
+                          <th>ATE↓</th>
+                          <th>Time [s]↓</th>
+                        </tr>
+                      </thead>
+
+                      <tbody class="has-text-centered">
+                        <!-- 25 -->
+                        <!-- <tr class="group-start">
+                          <td class="group-label" rowspan="8"><span>25</span></td>
+                          <td class="has-text-left">VGGT</td>
+                          <td>84.4</td>
+                          <td>81.5</td>
+                          <td>0.033</td>
+                          <td>0.63</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S25</td>
+                          <td>83.8</td>
+                          <td>80.6</td>
+                          <td>0.032</td>
+                          <td>0.66</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S50</td>
+                          <td>81.4</td>
+                          <td>79.5</td>
+                          <td>0.032</td>
+                          <td>0.56</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S75</td>
+                          <td>56.9</td>
+                          <td>65.6</td>
+                          <td>0.037</td>
+                          <td>0.54</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup></td>
+                          <td>84.4</td>
+                          <td>83.8</td>
+                          <td>0.020</td>
+                          <td>0.62</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S25</td>
+                          <td>84.4</td>
+                          <td>83.5</td>
+                          <td>0.020</td>
+                          <td>0.66</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S50</td>
+                          <td>82.6</td>
+                          <td>82.1</td>
+                          <td>0.019</td>
+                          <td>0.64</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S75</td>
+                          <td>56.9</td>
+                          <td>65.6</td>
+                          <td>0.025</td>
+                          <td>0.65</td>
+                        </tr> -->
+
+                        <!-- 50 -->
+                        <!-- <tr class="group-start">
+                          <td class="group-label" rowspan="8"><span>50</span></td>
+                          <td class="has-text-left">VGGT</td>
+                          <td>84.8</td>
+                          <td>81.5</td>
+                          <td>0.023</td>
+                          <td>1.5</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S25</td>
+                          <td>83.8</td>
+                          <td>80.9</td>
+                          <td>0.023</td>
+                          <td>1.2</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S50</td>
+                          <td>81.6</td>
+                          <td>79.5</td>
+                          <td>0.023</td>
+                          <td>1.1</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S75</td>
+                          <td>57.3</td>
+                          <td>61.0</td>
+                          <td>0.025</td>
+                          <td>1.0</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup></td>
+                          <td>85.4</td>
+                          <td>84.6</td>
+                          <td>0.015</td>
+                          <td>2.1</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S25</td>
+                          <td>84.5</td>
+                          <td>83.9</td>
+                          <td>0.015</td>
+                          <td>1.2</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S50</td>
+                          <td>82.3</td>
+                          <td>82.9</td>
+                          <td>0.015</td>
+                          <td>1.1</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S75</td>
+                          <td>57.9</td>
+                          <td>67.0</td>
+                          <td>0.016</td>
+                          <td>1.0</td>
+                        </tr> -->
+
+                        <!-- 100 -->
+                        <!-- <tr class="group-start">
+                          <td class="group-label" rowspan="8"><span>100</span></td>
+                          <td class="has-text-left">VGGT</td>
+                          <td>84.8</td>
+                          <td>81.3</td>
+                          <td>0.015</td>
+                          <td>7.9</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S25</td>
+                          <td>83.9</td>
+                          <td>80.8</td>
+                          <td>0.016</td>
+                          <td>2.9</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S50</td>
+                          <td>81.7</td>
+                          <td>79.7</td>
+                          <td>0.016</td>
+                          <td>2.6</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S75</td>
+                          <td>58.1</td>
+                          <td>61.5</td>
+                          <td>0.017</td>
+                          <td>2.1</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup></td>
+                          <td>85.7</td>
+                          <td>84.6</td>
+                          <td>0.012</td>
+                          <td>4.3</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S25</td>
+                          <td>84.9</td>
+                          <td>84.2</td>
+                          <td>0.012</td>
+                          <td>2.5</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S50</td>
+                          <td>83.0</td>
+                          <td>83.0</td>
+                          <td>0.012</td>
+                          <td>2.2</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S75</td>
+                          <td>58.9</td>
+                          <td>67.2</td>
+                          <td>0.012</td>
+                          <td>1.8</td>
+                        </tr> -->
+
+                        <!-- 200 -->
+                        <tr class="group-start">
+                          <td class="group-label" rowspan="8"><span>200</span></td>
+                          <td class="has-text-left">VGGT</td>
+                          <td>83.9</td>
+                          <td>79.9</td>
+                          <td>0.012</td>
+                          <td>18</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S25</td>
+                          <td>83.1</td>
+                          <td>79.6</td>
+                          <td>0.011</td>
+                          <td>8.5</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S50</td>
+                          <td>80.7</td>
+                          <td>78.4</td>
+                          <td>0.011</td>
+                          <td>7.3</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S75</td>
+                          <td>57.1</td>
+                          <td>60.8</td>
+                          <td>0.013</td>
+                          <td>5.5</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup></td>
+                          <td>85.4</td>
+                          <td>83.9</td>
+                          <td>0.009</td>
+                          <td>13.9</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S25</td>
+                          <td>84.6</td>
+                          <td>83.5</td>
+                          <td>0.009</td>
+                          <td>6.8</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S50</td>
+                          <td>82.9</td>
+                          <td>82.3</td>
+                          <td>0.009</td>
+                          <td>5.8</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S75</td>
+                          <td>59.8</td>
+                          <td>67.7</td>
+                          <td>0.009</td>
+                          <td>4.4</td>
+                        </tr>
+
+                        <!-- full -->
+                        <tr class="group-start">
+                          <td class="group-label" rowspan="8"><span>full</span></td>
+                          <td class="has-text-left">VGGT</td>
+                          <td>73.4</td>
+                          <td>72.5</td>
+                          <td>0.008</td>
+                          <td>35</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S25</td>
+                          <td>72.7</td>
+                          <td>72.2</td>
+                          <td>0.009</td>
+                          <td>17.9</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S50</td>
+                          <td>70.3</td>
+                          <td>71.1</td>
+                          <td>0.008</td>
+                          <td>14.4</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">VGGT-S75</td>
+                          <td>46.0</td>
+                          <td>53.0</td>
+                          <td>0.009</td>
+                          <td>10.4</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup></td>
+                          <td>75.8</td>
+                          <td>75.8</td>
+                          <td>0.006</td>
+                          <td>27.9</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S25</td>
+                          <td>74.8</td>
+                          <td>75.3</td>
+                          <td>0.006</td>
+                          <td>13.6</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S50</td>
+                          <td>73.0</td>
+                          <td>74.2</td>
+                          <td>0.006</td>
+                          <td>11.3</td>
+                        </tr>
+                        <tr>
+                          <td class="has-text-left">&pi;<sup>3</sup>-S75</td>
+                          <td>50.0</td>
+                          <td>59.1</td>
+                          <td>0.006</td>
+                          <td>7.8</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </figure>
+                  <figcaption>
+                    <p>
+                      <b>Feed-Forward Camera Pose Estimation on Tanks & Temples.</b> See the paper for the full table.
+                    </p>
+                  </figcaption>
+                </div>
+              </div>
+              <div class="column is-half-desktop has-text-centered">
+                <div class="content has-text-justified">
+                  <figure class="full-width">
+                    <div class="img-card">
+                      <img src="./static/images/sparsity_frames.png" alt="Sparsity"
+                        style="max-width: min(350px, 100%);" />
+                    </div>
+                  </figure>
+                  <figcaption>
+                    <p>
+                      <b>Results on Tanks & Temples for different input sizes and sparsity ratios.</b>
+                    </p>
+                  </figcaption>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <div style="position: relative">
+        <pre><code id="bibtex">@article{wang2025sparsevggt,
+  title     = {{Faster VGGT with Block-Sparse Global Attention}},
+  author    = {Wang, Chung-Shien Brian and Schmidt, Christian and Piekenbrinck, Jens and Leibe, Bastian},
+  journal   = {arXiv preprint arXiv:2509.07120},
+  year      = {2025}
+}</code></pre>
+        <button onclick="copyToClipboard()" class="copy-button button is-rounded is-dark">
+          <span class="icon">
+            <i class="far fa-copy" id="bibtex-copy-icon"></i>
+          </span>
+          <span>Copy</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              This website is licensed under a <a rel="license"
+                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+                Commons Attribution-ShareAlike 4.0 International License</a>.
+            </p>
+            <p>
+              The souce code is borrowed from <a href="https://github.com/nerfies/nerfies.github.io">nerfies</a>,
+              we thank the authors for sharing the templates.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./static/js/copy-bibtex.js"></script>
+
+</body>
+
+</html>
