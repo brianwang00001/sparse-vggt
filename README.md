@@ -1,5 +1,7 @@
 # Faster VGGT with Block-Sparse Global Attention
 
+[📄 Arxiv](https://arxiv.org/abs/2509.07120) | [🌐 Project Page](https://brianwang00001.github.io/sparse-vggt/)
+
 ## Quick Start
 Setup the environment:
 ```bash
