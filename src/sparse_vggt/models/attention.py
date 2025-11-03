@@ -55,7 +55,7 @@ def adaptive_sparse_attention_forward(
     sparse_ratio: float | None = None,
     cdf_threshold: float | None = None,
     pool_mode: str = "avg",
-    aux_sparsity_only: bool | None = None,
+    aux_sparsity_only: bool = True,
     aux_output_store: dict | None = None,
     num_special_tokens: int = 5,
     num_heads: int = 16,
@@ -108,8 +108,9 @@ def adaptive_sparse_attention_forward(
         x_special = F.scaled_dot_product_attention(q_special, k, v)
     else:
         x_special = None
-    # release memory
-    del q, k, v, qkv
+    # release memory unless needed
+    if aux_sparsity_only:
+        del q, k, v, qkv
 
     # Append special key and values in the end
     if k_special is not None:

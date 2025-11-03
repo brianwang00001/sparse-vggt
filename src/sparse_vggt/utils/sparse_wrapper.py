@@ -220,7 +220,7 @@ def block_sparse_attn_cuda(
     )
     o = o.to(out_dtype)
     if return_sparsity:
-        sparsity = 1 - final_map.float().mean().item()
+        sparsity = 1 - final_map.float().mean()
         return o, sparsity
     else:
         return o

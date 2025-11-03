@@ -14,8 +14,8 @@ from sparse_vggt.utils.sparse_wrapper import check_sparse_mode
 def sparse_vggt_aggregator_forward(
     self,
     images: torch.Tensor,
-    use_hilbert: bool = True,
-    intermediate_layer_idx: list[int] = [4, 11, 17, 23],  # hardcoded for vggt
+    use_hilbert: bool = False,
+    intermediate_layer_idx: list[int]|None = None
 ):
     """Adaptive Block Sparse Attention Aggregator forward pass to replace the original aggregator forward function.
 
@@ -29,6 +29,11 @@ def sparse_vggt_aggregator_forward(
             The list of outputs from the attention blocks,
             and the patch_start_idx indicating where patch tokens begin.
     """
+    # default to layers used by VGGT
+    intermediate_layer_idx = (
+        intermediate_layer_idx or
+        getattr(self, "intermediate_layer_idx", [4, 11, 17, 23])
+    )
     B, N, C_in, H, W = images.shape
 
     if C_in != 3:
@@ -52,6 +57,8 @@ def sparse_vggt_aggregator_forward(
 
     # Concatenate special tokens with patch tokens
     tokens = torch.cat([camera_token, register_token, patch_tokens], dim=1)
+    # reduce memory usage (inference only)
+    del patch_tokens
 
     # convert to patch dimension
     H = H // self.patch_size

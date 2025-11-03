@@ -43,7 +43,7 @@ def pi3_sparse_attention_forward(
     )
 
 
-def sparse_pi3_decode_forward(self, hidden, N, H, W, use_hilbert=True):
+def sparse_pi3_decode_forward(self, hidden, N, H, W, use_hilbert=False):
     BN, hw, _ = hidden.shape
     B = BN // N
 
