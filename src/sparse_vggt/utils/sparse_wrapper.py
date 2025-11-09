@@ -9,6 +9,28 @@ from spas_sage_attn.utils import (
     hyperparameter_check,
 )
 
+from collections import namedtuple
+SortResult = namedtuple("SortResult", ["values", "indices"])
+
+
+def _int32_idx(sort_result):
+    return SortResult(
+        sort_result.values,
+        sort_result.indices.to(torch.int32),
+    )
+
+
+def _mem_eff_sort(t, chunks=4, dim=1):
+    # Reduces max memory overhead of sorting large numbers of small-ish arrays
+    # split along heads (number of heads is usually divisible by 4)
+    sorted = [
+        _int32_idx(torch.sort(tt, dim=-1, descending=True))
+        for tt in torch.chunk(t, chunks, dim=dim)
+    ]
+    values = torch.cat([s.values for s in sorted], dim=dim)
+    indices = torch.cat([s.indices for s in sorted], dim=dim)
+    return SortResult(values, indices)
+
 
 def check_sparse_mode(sparse_ratio, cdf_threshold):
     """Check the valid combinations of sparse_ratio, and cdf_threshold for sparse inference.
@@ -103,7 +125,12 @@ def get_block_mask(
     if cdf_threshold is not None:
         assert cdf_threshold >= 0 and cdf_threshold <= 1
 
-    sorted_score = torch.sort(pooled_score, dim=-1, descending=True)
+    # try to avoid large additional memory allocation of torch.sort
+    # see also https://github.com/pytorch/pytorch/issues/77049
+    if pooled_score.numel() < 2e8:
+        sorted_score = torch.sort(pooled_score, dim=-1, descending=True)
+    else:
+        sorted_score = _mem_eff_sort(pooled_score)
 
     num_to_select = None
     if cdf_threshold is not None:
@@ -143,7 +170,6 @@ def block_sparse_attn_cuda(
     cdf_threshold: float | None = None,
     return_sparsity: bool = False,
     dtype: torch.dtype = torch.float16,
-    out_dtype: torch.dtype = torch.float32,
 ):
     """Block sparse attention using SpargeAttn kernels
 
@@ -163,6 +189,8 @@ def block_sparse_attn_cuda(
     Returns:
         out: Attention output of shape (B, nheads, T, head_dim)
     """
+    out_dtype = query.dtype
+
     # Hardcode some arguments for using SpargeAttn kernels
     _is_causal = 0
     KBLK = 64
