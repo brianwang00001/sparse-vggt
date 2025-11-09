@@ -34,6 +34,7 @@ def sparse_vggt_aggregator_forward(
         intermediate_layer_idx or
         getattr(self, "intermediate_layer_idx", [4, 11, 17, 23])
     )
+    device = images.device
     B, N, C_in, H, W = images.shape
 
     if C_in != 3:
@@ -45,6 +46,7 @@ def sparse_vggt_aggregator_forward(
     # Reshape to [B*N, C, H, W] for patch embedding
     images = images.view(B * N, C_in, H, W)
     patch_tokens = self.patch_embed(images)
+    del images
 
     if isinstance(patch_tokens, dict):
         patch_tokens = patch_tokens["x_norm_patchtokens"]
@@ -58,20 +60,20 @@ def sparse_vggt_aggregator_forward(
     # Concatenate special tokens with patch tokens
     tokens = torch.cat([camera_token, register_token, patch_tokens], dim=1)
     # reduce memory usage (inference only)
-    del patch_tokens
+    del camera_token, register_token, patch_tokens
 
     # convert to patch dimension
     H = H // self.patch_size
     W = W // self.patch_size
     pos = None
     if self.rope is not None:
-        pos = self.position_getter(B * N, H, W, device=images.device)
+        pos = self.position_getter(B * N, H, W, device=device)
 
     if self.patch_start_idx > 0 and pos is not None:
         # do not use position embedding for special tokens (camera and register tokens)
         # so set pos to 0 for the special tokens
         pos = pos + 1
-        pos_special = torch.zeros(B * N, self.patch_start_idx, 2).to(images.device).to(pos.dtype)
+        pos_special = torch.zeros(B * N, self.patch_start_idx, 2).to(device).to(pos.dtype)
         pos = torch.cat([pos_special, pos], dim=1)
 
     # update P because we added special tokens
