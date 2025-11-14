@@ -3,16 +3,20 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="description" content="Global Attention is the main computational contributor in VGGT and 𝜋3. Our analysis reveals sparsity patterns in the attention that we exploit with a training-free approach, achieving up to 4× faster inference.">
-  <meta name="keywords" content="VGGT, Faster VGGT, Sparse, Block-Sparse Global Attention, 3D Reconstruction">
+  <meta name="description"
+    content="Global Attention is the main computational contributor in VGGT, 𝜋3 and MapAnything. Our analysis reveals sparsity patterns in the attention that we exploit with a training-free approach, achieving up to 3× faster inference.">
+  <meta name="keywords"
+    content="VGGT, Faster VGGT, Pi3, MapAnything, Sparse, Sparse Attention, Block-Sparse, Block-Sparse Attention, Global Attention, Multi-View Transformer, 3D Reconstruction">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Faster VGGT with Block-Sparse Global Attention</title>
-  <meta property="og:title" content="Faster VGGT with Block-Sparse Global Attention">
-  <meta property="og:description" content="Global Attention is the main computational contributor in VGGT and 𝜋3. Our analysis reveals sparsity patterns in the attention that we exploit with a training-free approach, achieving up to 4× faster inference.">
-  
+  <title>Block-Sparse Global Attention for Efficient Multi-View Geometry Transformers</title>
+  <meta property="og:title" content="Block-Sparse Global Attention for Efficient Multi-View Geometry Transformers">
+  <meta property="og:description"
+    content="Global Attention is the main computational contributor in VGGT, 𝜋3 and MapAnything. Our analysis reveals sparsity patterns in the attention that we exploit with a training-free approach, achieving up to 3× faster inference.">
+
   <meta property="twitter:card" content="summary">
-  <meta property="twitter:title" content="Faster VGGT with Block-Sparse Global Attention">
-  <meta property="twitter:description" content="Global Attention is the main computational contributor in VGGT and 𝜋3. Our analysis reveals sparsity patterns in the attention that we exploit with a training-free approach, achieving up to 4× faster inference.">
+  <meta property="twitter:title" content="Block-Sparse Global Attention for Efficient Multi-View Geometry Transformers">
+  <meta property="twitter:description"
+    content="Global Attention is the main computational contributor in VGGT, 𝜋3 and MapAnything. Our analysis reveals sparsity patterns in the attention that we exploit with a training-free approach, achieving up to 3× faster inference.">
 
   <link
     href="https://fonts.googleapis.com/css2?family=Castoro&family=Noto+Sans:wght@400;600;800&family=Google+Sans&display=swap"
@@ -43,7 +47,8 @@
       <div class="container is-max-desktop">
         <div class="columns is-centered">
           <div class="column has-text-centered">
-            <h1 class="title is-2 publication-title">Faster VGGT with Block-Sparse Global Attention</h1>
+            <h1 class="title is-2 publication-title">Block-Sparse Global Attention for Efficient Multi-View Geometry
+              Transformers</h1>
             <div class="is-size-5 publication-authors">
               <span class="author-block">
                 <a href="">Chung-Shien Brian Wang</a>
@@ -107,11 +112,10 @@
           <div class="content has-text-justified">
             <div class="info-box">
               <span style="font-size: 2.5rem;">⚡️</span>
-              <span>Global Attention is the main computational contributor in VGGT and \(\pi^3\). Our analysis reveals <b>sparsity</b>
-                patterns in
-                the attention that we exploit with a <b>training-free</b> approach, achieving up to <b>\(4\times\)
-                  faster</b>
-                inference.</span>
+              <span>Global Attention is the main computational contributor in VGGT, \(\pi^3\) and MapAnything. Our
+                analysis reveals <b>sparsity</b>
+                patterns in the attention that we exploit with a <b>training-free</b> approach, achieving up to
+                <b>\(3\times\) faster</b> inference.</span>
             </div>
             <figure class="full-width">
               <div class="img-card">
@@ -143,20 +147,18 @@
           <div class="content has-text-justified">
             <p>
               Efficient and accurate feed-forward multi-view reconstruction has long been an important task in computer
-              vision.
-              Recent transformer-based models like VGGT and \(\pi^3\) have achieved impressive results with simple
-              architectures, yet they face an inherent runtime bottleneck, due to the quadratic complexity of the global
-              attention layers, that limits the scalability to large image sets.
-              In this paper, we empirically analyze the global attention matrix of these models and observe that
-              probability mass concentrates on a small subset of patch-patch interactions that correspond to cross-view
-              geometric matches.
-              Motivated by the structured attention and inspired by recent advancement in large language models, we
-              propose a replacement for the dense global attention operation based on highly optimized block-sparse
-              kernels, yielding up to \(\mathbf{4\times}\) faster inference with comparable task performance.
-              Our retrofit requires no retraining of the backbone, extends to both VGGT and \(\pi^3\), and supports
-              larger image collections.
-              Evaluations on a comprehensive suite of multi-view benchmarks demonstrate the effectiveness of our
-              approach.
+              vision. Recent transformer-based models like VGGT, \(\pi^3\) and MapAnything have demonstrated remarkable
+              performance with relatively simple architectures. However, their scalability is fundamentally constrained
+              by the quadratic complexity of global attention, which imposes a significant runtime bottleneck when
+              processing large image sets. In this work, we empirically analyze the global attention matrix of these
+              models and observe that the probability mass concentrates on a small subset of patch-patch interactions
+              corresponding to cross-view geometric correspondences. Building on this insight and inspired by recent
+              advances in large language models, we propose a training-free, block-sparse replacement for dense global
+              attention, implemented with highly optimized kernels. Our method accelerates inference by more than
+              \(\mathbf{3\times}\) while maintaining comparable task performance. Evaluations on a comprehensive suite
+              of multi-view benchmarks demonstrate that our approach seamlessly integrates into existing global
+              attention-based architectures such as VGGT, \(\pi^3\), and MapAnything, while substantially improving
+              scalability to large image collections.
             </p>
           </div>
         </div>
@@ -339,7 +341,8 @@
             <h4 class="title has-text-centered">Relative Pose Estimation & Multi-View Reconstruction</h4>
             <figure class="full-width">
               <div class="img-card">
-                <img src="./static/images/quantitative_experiments.png" alt="Quantitative Experiments" style="max-width:840px;" />
+                <img src="./static/images/quantitative_experiments.png" alt="Quantitative Experiments"
+                  style="max-width:840px;" />
               </div>
             </figure>
             <figcaption>
@@ -702,7 +705,7 @@
       <h2 class="title">BibTeX</h2>
       <div style="position: relative">
         <pre><code id="bibtex">@article{wang2025sparsevggt,
-  title     = {{Faster VGGT with Block-Sparse Global Attention}},
+  title     = {{Block-Sparse Global Attention for Efficient Multi-View Geometry Transformers}},
   author    = {Wang, Chung-Shien Brian and Schmidt, Christian and Piekenbrinck, Jens and Leibe, Bastian},
   journal   = {arXiv preprint arXiv:2509.07120},
   year      = {2025}
