@@ -40,6 +40,7 @@ body {
 .publication-venue {
   color: #555;
   width: fit-content;
+  margin: 0 auto;
   font-weight: bold;
 }
 
